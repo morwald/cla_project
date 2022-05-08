@@ -1,0 +1,131 @@
+\documentclass{article}
+\usepackage{hyperref}
+\usepackage{algorithm}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\newtheorem{theorem}{Theorem}
+
+\title{Blendenpik: Randomized Least Squares \\[1ex] \large Project - Computational Linear Algebra, EPFL, Spring 22}
+\author{Moritz Waldleben}
+\date{May 2022}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+Blendenpik algorithm \cite{blendenpik} is a randomized algorithm to solve a
+linear least-squares problem. The iterative algorithm used for solving this minimization
+problem is called LSQR. Blendenpik constructs a random projection preconditioner
+for the LSQR algorithm which convergences in fewer steps than an
+unpreconditioned LSQR.  
+
+The Blendenpik algorithm can beat the standard LAPACK implementation for very
+large matrices. In this report, we will discuss the main concepts. In this report,
+we will investigate the method proposed in the paper.
+
+Instead of the LSQR
+algorithm, we will use the minimum residual method (MINRES) with preconditioning.
+MINRES will be applied to the normal equation of the least-squares problem. A
+Matlab implementation is given and some illustrative results will be shown.
+
+\section{Motivation}
+Let us look at a large overdetermined system: $A \in \mathbb{R}^{m \times n}, b \in \mathbb{R}^{m}, m>>n, \text { and } \operatorname{rank}(A)=n$. The corresponding linear squares problem can be written as
+
+$$\min _{x \in \mathbb{R}^{n}}\|A \mathbf{x}-\mathbf{b}\|_{2}$$
+
+\section{The uniform random sampling}
+To tackle uniform random sampling an important property for the matrix $A$ is coherence. Coherence tells us how much the solution of the system will depend on one row.
+Formally coherence can be defined as
+$$
+\mu(A)=\max _{i}\|U(i,:)\|_{2}^{2},
+$$
+where $\frac{n}{m} \le \mu(A) \le 1$. 
+
+From the above definition we can think of two extreme example cases:
+
+\begin{enumerate}
+\item
+Zero entry in $A$ will lead to a large row
+\item
+A has only one nonzero entry in one of the columns
+\end{enumerate}
+
+We will now prove bounds for the coherence number $\mu(A)$ for a general matrix $A \in \mathbb{R}{m \times n}$.
+
+\bigskip
+
+
+The following theorem gives us a probabilistic upper bound the condition number of $AR^{-1}$.
+This will later be useful the ensure that the preconditioned iterative solver
+will converge in a few iterations.
+
+\begin{theorem}{blendenpik}
+Let $A$ be an $m \times n$ full rank matrix, and let $\mathcal{S}$ be a random
+sampling operator that samples $r \geq n$ rows from $A$ uniformly. Let $\tau=C
+\sqrt{m \mu(A) \log (r) / r}$, where $C$ is some constant defined in the proof.
+Assume that $\delta^{-1} \tau<1$. With probability of at least $1-\delta$, the
+sampled matrix $\mathcal{S} A$ is full rank, and if $\mathcal{S} A=Q R$ is a
+reduced $Q R$ factorization of $\mathcal{S} A$, we have
+$$
+\kappa\left(A R^{-1}\right) \leq \frac{1+\delta^{-1} \tau}{1-\delta^{-1} \tau}
+$$
+\end{theorem}
+
+To prove the above we will state and use two theorems which correspond to theorem 1 in \cite{CUR} and theorem 7 in \cite{randalg}. 
+
+\begin{theorem}{CUR}
+Suppose that $l, m$, and $n$ are positive integers such that $m \geq l \geq n$. Suppose further that $A$ is a full-rank $m \times n$ matrix, and that the SVD of $A$ is
+$$
+A_{m \times n}=U_{m \times n} \Sigma_{n \times n} V_{n \times n}^{*} .
+$$
+Suppose in addition that $T$ is an $l \times m$ matrix such that the $l \times n$ matrix TU has full rank.
+
+Then, there exists an $n \times n$ matrix $P$, and an $l \times n$ matrix $Q$ whose columns are orthonormal, such that
+$$
+T_{l \times m} A_{m \times n}=Q_{l \times n} P_{n \times n} .
+$$
+Furthermore, if $P$ is any $n \times n$ matrix, and $Q$ is any $l \times n$ matrix whose columns are orthonormal, such that $P$ and $Q$ satisfy Eq. 27, then the condition numbers of $A P^{-1}$ and $T U$ are equal.
+\end{theorem}
+
+\begin{theorem}
+ Suppose $A \in \mathbb{R}^{m \times n}, B \in \mathbb{R}^{n \times p}$, and $c \leq n$. Construct $C$ and $R$ with Algorithm 6, using the EXPECTED $(c)$ algorithm. If the sampling probabilities $\left\{p_{i}\right\}_{i=1}^{n}$ used by the algorithm are of the form (44) or (45), then
+$$
+\mathbf{E}\left[\|A B-C R\|_{F}\right] \leq \frac{1}{\sqrt{\beta c}}\|A\|_{F}\|B\|_{F} .
+$$
+If, in addition, $B=A^{T}$, then
+$$
+\mathbf{E}\left[\left\|A A^{T}-C C^{T}\right\|_{2}\right] \leq O(1) \sqrt{\frac{\log c}{\beta c}}\|A\|_{F}\|A\|_{2} .
+$$
+\end{theorem}
+
+Now we will prove the theorem \ref{}. 
+
+\section{The Blendenpik algorithm}
+As mentioned before the In this report, we will primarily focus on the DCT transformation. Additionally, instead of the LSQR algorithm, the Minimal residual method (MINRES) will be used to solve the preconditioned least-squares problem. To apply MINRES the normal equation of...
+
+%\begin{algorithm}[htb]
+%\caption{Blendenpik overview (using MINRES)}
+%\begin{enumerate}
+%    \item
+%    1. Choose $R$ of size r, a subset of rows of $A$$
+%    \item
+%    2. Calculate $A(R,:) = QR$ 
+%    \item
+%    3. Calculate $A(R, :)A(R, :)^T$
+%    \item 
+%    4. MINRES to $AA^T$ with preconditioner $R^{-1}$
+%\end{enumerate}
+%\end{algorithm}
+
+
+
+\section{Implementation}
+
+\section{Numerical Experiments}
+
+
+\bibliography{refs} 
+\bibliographystyle{plain}
+
+\end{document}
