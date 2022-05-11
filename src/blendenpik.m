@@ -1,4 +1,4 @@
-function [x] = blendenpik(A, b, gamma, transform_type)
+function [x, iter] = blendenpik(A, b, gamma, transform_type)
     [m, n] = size(A);
     
     if m < n
@@ -33,10 +33,14 @@ function [x] = blendenpik(A, b, gamma, transform_type)
         R = qr(S * M);
         R = triu(R(1:n, 1:n));
         
+        fprintf("cond(inv(R')*A'*A*inv(R)): %f\n", cond(inv(R') * (A' * A) * inv(R)));
         cond_estimate = rcond(R);
         if 1 / cond_estimate > 5 * eps(1)
-            x = minres(A'*A, A'*b, R, 10^-14);
+            [x, flag, relres, iter] = minres(A'* A, A'* b, 10^-8, 100, R', R);
+%             x = minres(A'* A, A'* b, 10^-14, 100, R' * R);
+%             x = minres(A'* A, A'* b, 10^-8, 100, []);
 %             x = lsqr(A, b, 10^-14, 100, R);
+%             x = lsqr(A, b, 10^-14, 100, []);
             return
         elseif n_iter > 3
             fprintf("Failure, solve using LAPACK \n");

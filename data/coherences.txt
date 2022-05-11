@@ -1,0 +1,67 @@
+Incoherent, ill-conditioned matrix
+cond(A1): 1.000000e+05
+cond(A1'*A1): 1.000000e+10
+gamma: 2
+cond(inv(R')*A'*A*inv(R)): 33.742044
+gamma: 3
+cond(inv(R')*A'*A*inv(R)): 12.834548
+gamma: 4
+cond(inv(R')*A'*A*inv(R)): 8.025777
+gamma: 5
+cond(inv(R')*A'*A*inv(R)): 6.007600
+gamma: 6
+cond(inv(R')*A'*A*inv(R)): 5.225271
+gamma: 7
+cond(inv(R')*A'*A*inv(R)): 4.231827
+gamma: 8
+cond(inv(R')*A'*A*inv(R)): 3.955316
+gamma: 9
+cond(inv(R')*A'*A*inv(R)): 3.450710
+gamma: 10
+cond(inv(R')*A'*A*inv(R)): 3.156687
+
+
+Coherent, ill-conditioned matrix
+cond(A2): 1.000000e+05
+cond(A2'*A2): 1.000000e+10
+gamma: 2
+cond(inv(R')*A'*A*inv(R)): 13995939.390645
+gamma: 3
+cond(inv(R')*A'*A*inv(R)): 9273.206638
+gamma: 4
+cond(inv(R')*A'*A*inv(R)): 206.424330
+gamma: 5
+cond(inv(R')*A'*A*inv(R)): 31.592234
+gamma: 6
+cond(inv(R')*A'*A*inv(R)): 10.331693
+gamma: 7
+cond(inv(R')*A'*A*inv(R)): 13.431800
+gamma: 8
+cond(inv(R')*A'*A*inv(R)): 8.510722
+gamma: 9
+cond(inv(R')*A'*A*inv(R)): 5.289643
+gamma: 10
+cond(inv(R')*A'*A*inv(R)): 5.080143
+
+
+Random matrix
+cond(A3): 1.863449e+01
+cond(A3'*A3): 3.472443e+02
+gamma: 2
+cond(inv(R')*A'*A*inv(R)): 31.656363
+gamma: 3
+cond(inv(R')*A'*A*inv(R)): 14.524481
+gamma: 4
+cond(inv(R')*A'*A*inv(R)): 8.910649
+gamma: 5
+cond(inv(R')*A'*A*inv(R)): 5.917471
+gamma: 6
+cond(inv(R')*A'*A*inv(R)): 4.772542
+gamma: 7
+cond(inv(R')*A'*A*inv(R)): 4.812548
+gamma: 8
+cond(inv(R')*A'*A*inv(R)): 4.191515
+gamma: 9
+cond(inv(R')*A'*A*inv(R)): 3.813584
+gamma: 10
+cond(inv(R')*A'*A*inv(R)): 3.366914
