@@ -35,8 +35,8 @@ function [x] = blendenpik(A, b, gamma, transform_type)
         
         cond_estimate = rcond(R);
         if 1 / cond_estimate > 5 * eps(1)
-%             x = minres(A, b, R, 10^-14);
-            x = lsqr(A, b, 10^-14, 100, R);
+            x = minres(A'*A, A'*b, R, 10^-14);
+%             x = lsqr(A, b, 10^-14, 100, R);
             return
         elseif n_iter > 3
             fprintf("Failure, solve using LAPACK \n");
