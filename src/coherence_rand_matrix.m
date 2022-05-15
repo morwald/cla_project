@@ -1,18 +1,28 @@
-% mean coherence of 1000 random matrices
-rng(11);
+rand('state', 42);
+n_matrices = 1000; n_rows = 1000; n_cols = 50;
+
+% b) average coherences
 coherences = [];
-for i=1:1000
-    U = orth(rand(1000, 50));
-    coherence = max(sum(U.^2, 2));
+for n=1:n_matrices
+    A = rand(n_rows, n_cols);
+    if ~(rank(A) == n_cols)
+        fprintf("rank deficient random matrix with rank: %i\n", rank(A));
+    end
+    [Q, R] = qr(A, 0);
+    coherence = max(sum(Q .^ 2, 2));
     coherences = [coherences, coherence];
 end
-disp(mean(coherences))
 
-% coherence of a matrix with one nonzero
-% element in a specific column
-A = rand(1000, 50);
-A(:,1) = 0;
-A(1,1) = 1;
-U = orth(A);
-coherence_1 = max(sum(U.^2, 2));
-disp(coherence_1)
+mean_coherence = mean(coherences);
+fprintf("Mean coherence of random matrices: %d\n", mean_coherence);
+
+
+% b) example matrix with dimension (1000, 50) with coherence = 1
+A = rand(n_rows, n_cols);
+A(:, 1) = 0;
+%A(1, 1) = 0; % coherence=1 as well with one nnz entry
+[Q, R] = qr(A, 0);
+coherence = max(sum(Q .^ 2, 2));
+
+fprintf("Example matrix with worst possible coherence: %d\n", coherence);
+
