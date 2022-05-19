@@ -17,7 +17,7 @@
 Blendenpik \cite{blendenpik} is a randomized algorithm for a linear
 least-squares problem. The method constructs a random projection preconditioner
 for an iterative solver (LSQR) and converges in fewer steps than an
-un-preconditioned LSQR. Moreover, Blendenpik can beat the standard LAPACK
+unpreconditioned LSQR. Moreover, Blendenpik can beat the standard LAPACK
 implementation for very large matrices. 
 
 Instead of the LSQR algorithm used in the paper \cite{blendenpik}, we will use
@@ -30,7 +30,7 @@ Let us look at a large overdetermined system: $A \in \mathbb{R}^{m \times n}, b
 \in \mathbb{R}^{m}, m>>n, \text { and } \operatorname{rank}(A)=n$. The
 corresponding linear least-squares problem can be written as
 
-\begin{equation} \label{equ_lq}
+\begin{equation} \label{eq_lq}
 \min _{x \in \mathbb{R}^{n}}\|A \mathbf{x}-\mathbf{b}\|_{2}
 \end{equation}
 
@@ -38,19 +38,19 @@ One might think that the linear system has redundant information. We could thus
 try to solve a smaller system and sample $\mathcal{S}$ rows of the matrix to
 get an approximated solution.
 
-\begin{equation} \label{equ_lq_red}
+\begin{equation} \label{eq_lq_red}
 x_{\mathcal{R}}=\arg \min _{x}\|A(\mathcal{R},:) x-b(\mathcal{R})\|_{2}
 \end{equation}
 
 This reduction technique is rarely implemented, in practice, because of lacking
-usefull bounds for the forward error (See \cite{blendenpik} for a detailed
+useful bounds for the forward error (See \cite{blendenpik} for a detailed
 explanation). An alternative way is to construct a preconditioner for the
-complete linear system \ref{equ_lq} using randomly selected rows. A reduced
+complete linear system \ref{eq_lq} using randomly selected rows. A reduced
 $QR$ factorization of the randomly sampled matrix $A(\mathcal{R},:)$ is a
 suitable preconditioner. This property is further discussed in section
 \ref{bound}.To implement Blendenpik using MINRES we would need to apply the
 iterative solver to the normal equation of the least-squares problem. The
-commented implemenation of the complet algorithm can be is shown in appendix
+commented implementation of the complete algorithm can be is shown in appendix
 \ref{app_code}. Below an overview of the algorithm is shown.
 
 \begin{algorithm}[htb]
@@ -77,7 +77,7 @@ where $\frac{n}{m} \le \mu(A) \le 1$.
 \bigskip
 
 To illustrate this property, we will look at the coherence of a randomly
-generated orthonormal matrices of size $\mathbb{R}^{100 \times 50}$.
+generated orthogonal matrices of size $\mathbb{R}^{100 \times 50}$.
 
 \begin{verbatim}
 % mean coherence of 1000 random matrices
@@ -94,14 +94,14 @@ disp(mean(coherences))
 \end{verbatim}
 
 The Matlab script above computes the average coherence number of randomly
-generated orthonormal matrices. As comparison, the minimal coherence for matrix
+generated orthogonal matrices. As comparison, the minimal coherence for matrix
 for $U$ is $\mu_{min}(U)= \frac{50}{1000} = 0.05$ from the definition in
 \ref{equ_coh}. The proof of the corresponding the bounds can be found in the
 \ref{app_coh}.
 
 The result shows that the coherence number is nearly optimal for randomly
-generated orthonormal matrices. On the other hand, we can expect this, as all
-elements of the matrice are created using a uniform distribution. 
+generated orthogonal matrices. On the other hand, we can expect this, as all
+elements of the matrix are created using a uniform distribution. 
 
 \bigskip
 
@@ -112,8 +112,8 @@ the nonzero entry has to be sampled to capture the "essence or direction" of
 the column with one nonzero entry.
 
 In contrast to a uniform sampled matrix discussed above, general matrices $A$
-will have high coherence numbers. But a good preconditener obtained from random sampling
-should still resemble $A$ and result in a a low conditioner number for the iterative
+will have high coherence numbers. But a good preconditioner obtained from random sampling
+should still resemble $A$ and result in a low conditioner number for the iterative
 solver (see theorem \ref{thm_1}). In summary, we have to control the coherence of $A$ to
 obtain a solid preconditioner.
 
@@ -149,8 +149,9 @@ $$
 $$
 \end{theorem}
 
-To prove the above we will state and use two theorems which correspond to
-theorem 1 in \cite{CUR} and theorem 7 in \cite{randalg}. 
+To prove the above we will state a 2 theorems which correspond to theorem 7 in
+\cite{randalg} (less general and rephrased for our problem) and theorem 1
+\cite{CUR}.
 
 \begin{theorem}{CUR} \label{thm_2}
 Suppose that $l, m$, and $n$ are positive integers such that $m \geq l \geq n$.
@@ -172,20 +173,80 @@ then the condition numbers of $A P^{-1}$ and $T U$ are equal.
 \end{theorem}
 
 \begin{theorem} \label{thm_3}
- Suppose $A \in \mathbb{R}^{m \times n}, B \in \mathbb{R}^{n \times p}$, and $c
- \leq n$. Construct $C$ and $R$ with Algorithm 6, using the EXPECTED $(c)$
- algorithm. If the sampling probabilities $\left\{p_{i}\right\}_{i=1}^{n}$ used
- by the algorithm are of the form (44) or (45), then
-$$
-\mathbf{E}\left[\|A B-C R\|_{F}\right] \leq \frac{1}{\sqrt{\beta c}}\|A\|_{F}\|B\|_{F} .
-$$
-If, in addition, $B=A^{T}$, then
+Suppose $A \in \mathbb{R}^{m \times n}$, and $c
+\leq n$. Construct $C$ with Algorithm 6, using the EXPECTED $(c)$
+algorithm. If the sampling probabilities $\left\{p_{i}\right\}_{i=1}^{n}$ used
+by the algorithm are of the form (44) or (45), then
 $$
 \mathbf{E}\left[\left\|A A^{T}-C C^{T}\right\|_{2}\right] \leq O(1) \sqrt{\frac{\log c}{\beta c}}\|A\|_{F}\|A\|_{2} .
 $$
 \end{theorem}
 
-Now we will prove the theorem \ref{thm_1}. 
+To relate this theorem with everything introduced so far some clarifications
+are needed. First of all the mentioned EXPECTED $(c)$ algorithm corresponds to
+(TODO: include algorithm) to a row sampling algorithm. Every row of a matrix
+$A$ sampled with probability $c \dot p_j$. All probabilities add up to $1$.
+After that a rescaling of all entries is done using a diagonal matrix $D$.
+
+Secondly we have to clarify on the parameter $\beta$ $\in (0,1]$:
+
+\begin{equation} \label{eq_beta}
+p_i \geq \beta \frac{\left\|A^{(i)}\right\|^2_2}{\|A\|_{F}^2}
+beta \leq p_i \frac{\|A\|_{F}^2}{\left\|A^{(i)}\right\|^2_2}
+\end{equation}
+
+We will now prove this theorem \ref{thm_1}. First of all we substitute the
+general matrix $A$ with an orthonormal matrix $U \in  \mathbb{R}^{m \times n}$
+where we know that $UU^T=I$. Secondly for $C=USD$. If we apply no scaling
+(i.e.$D=I$) as well then $C=US=U(\mathbb{R},:)$. Thus
+
+\begin{equation} \label{eq_intermed1}
+\mathbf{E}\left[\left\|I_{n \times n}-U(\mathbb{R},:)U(\mathbb{R},:)^T\right\|_2\right] \leq O(1)
+\sqrt{\frac{\log c}{\beta c}}\|A\|_{F}\|A\|_{2}
+\end{equation}
+
+Now we use equation \ref{eq_beta} to replace a bound for $\beta$. The second norm of U
+can be bounded by ... For an orthonormal matrix the Frobenius norm is equal to
+$1$. Furthermore $p_i$ is always smaller of equal to $1$. Thus we get
+
+\begin{equation} \label{eq_beta}
+p_i \geq \beta \frac{\left\|A^{(i)}\right\|^2_2}{\|A\|_{F}^2}
+\end{equation}
+
+\begin{equation} \label{eq_beta}
+\beta \leq \sqrt{\mu(U)} 
+\end{equation}
+
+Putting this togther the finale equation becomes
+
+\begin{equation} \label{eq_intermed2}
+\mathbf{E}\left[\left\|I_{n \times n}-U(\mathbb{R},:)U(\mathbb{R},:)^T\right\|_{2}\right] \leq O(1) \sqrt{\frac{\log c}{\beta c}}\|A\|_{F}\|A\|_{2}
+\end{equation}
+
+where the right part of the inequality corresponds to the $\tau$ of theorem \ref{thm_1} which we want to prove.
+
+From theorem \ref{thm_3} we know that the condition numbers  $\kappa(AR^{-1})$ and $\kappa(U)$ are equal.
+
+Now the we have to work on the left side of the inequality. We can a apply the Markov's inequality and get
+
+\begin{equation} \label{eq_intermed3}
+...
+\end{equation}
+
+With probability $\geq 1- \delta$ we have
+
+\begin{equation} \label{eq_intermed4}
+...
+\end{equation}
+
+
+The $1$ comes from assumption in theorem \ref{thm_1}.
+
+Now we look at the eigenvalues of $U^TU$....Rayleigh quotient argument
+
+
+Which finally gives us the desired result.
+
 
 \section{Implementation} \label{impl}
 
