@@ -1,5 +1,5 @@
 clear all; close all; clc;
-gammas = 2:1:16; tol = 1e-12; maxit = 200;
+gammas = 2:1:16; tol = 1e-12; maxit = 200; verbose=true;
 
 % e) i)
 rng(11);
@@ -18,7 +18,7 @@ errorsA1 = [];
 itersA1 = [];
 for gamma = gammas
     fprintf("gamma: %d\n", gamma);
-    [x_tilde, iters] = blendenpik(A1, b1, gamma, "DCT");
+    [x_tilde, iters] = blendenpik(A1, b1, gamma, "DCT", tol, verbose);
     
     errorsA1 = [errorsA1, norm(x1 - x_tilde)];
     itersA1 = [itersA1, iters];
@@ -41,7 +41,7 @@ errorsA2 = [];
 itersA2 = [];
 for gamma = gammas
     fprintf("gamma: %d\n", gamma);
-    [x_tilde, iters] = blendenpik(A2, b2, gamma, "DCT");
+    [x_tilde, iters] = blendenpik(A2, b2, gamma, "DCT", tol, verbose);
     
     errorsA2 = [errorsA2, norm(x2 - x_tilde)];
     itersA2 = [itersA2, iters];
@@ -65,7 +65,7 @@ x3 = A3 \ b3;
 % itersA3 = [];
 % for gamma = gammas
 %     fprintf("gamma: %d\n", gamma);
-%     [x_tilde, iters] = blendenpik(A3, b3, gamma, "DCT");
+%     [x_tilde, iters] = blendenpik(A3, b3, gamma, "DCT", tol, verbose);
 %     
 %     errorsA3 = [errorsA3, norm(x3 - x_tilde)];
 %     itersA3 = [itersA3, iters];
