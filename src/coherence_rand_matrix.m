@@ -1,7 +1,5 @@
 rand('state', 42);
 n_matrices = 1000; n_rows = 1000; n_cols = 50;
-% a = [1 2 3; 4 5 6];
-a = rand(100, 5);
 
 % b) average coherences
 coherences = [];
@@ -22,6 +20,7 @@ fprintf("Mean coherence of random matrices: %d\n", mean_coherence);
 % b) example matrix with dimension (1000, 50) with coherence = 1
 A = rand(n_rows, n_cols);
 A(:, 1) = 0;
+%A(1, 1) = 0; % coherence=1 as well with one nnz entry
 [Q, R] = qr(A, 0);
 coherence = max(sum(Q .^ 2, 2));
 
