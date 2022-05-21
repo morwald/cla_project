@@ -1,5 +1,5 @@
 clear all; close all; clc;
-gammas = 2:1:10; tol = 1e-8; maxit = 100;
+gammas = 2:1:16; tol = 1e-12; maxit = 200;
 
 % e) i)
 rng(11);
@@ -57,54 +57,65 @@ A3 = rand(m, n);
 b3 = rand(m, 1);
 x3 = A3 \ b3;
 
-fprintf("Random matrix\n");
-fprintf("cond(A3): %d \n", cond(A3));
-fprintf("cond(A3'*A3): %d \n", cond(A3'*A3));
-
-errorsA3 = [];
-itersA3 = [];
-for gamma = gammas
-    fprintf("gamma: %d\n", gamma);
-    [x_tilde, iters] = blendenpik(A3, b3, gamma, "DCT");
-    
-    errorsA3 = [errorsA3, norm(x3 - x_tilde)];
-    itersA3 = [itersA3, iters];
-end
-[x, flag, relres, iters_no_pc_min_res_A3] = minres(A3' * A3, A3' * b3,  tol, maxit, []);
-
+% fprintf("Random matrix\n");
+% fprintf("cond(A3): %d \n", cond(A3));
+% fprintf("cond(A3'*A3): %d \n", cond(A3'*A3));
+% 
+% errorsA3 = [];
+% itersA3 = [];
+% for gamma = gammas
+%     fprintf("gamma: %d\n", gamma);
+%     [x_tilde, iters] = blendenpik(A3, b3, gamma, "DCT");
+%     
+%     errorsA3 = [errorsA3, norm(x3 - x_tilde)];
+%     itersA3 = [itersA3, iters];
+% end
+% [x, flag, relres, iters_no_pc_min_res_A3] = minres(A3' * A3, A3' * b3,  tol, maxit, []);
 
 figure(1);
-plot(gammas, itersA1);
+plot(gammas, itersA1, '-*');
 hold on;
-plot(gammas, iters_no_pc_min_res_A1 * ones(length(gammas)));
-title("Incoherent, ill-conditioned matrix A1 convergence (tol=1e-8)");
-legend("MinRes Iterations in Blendenpik", "MinRes Iterations no preconditioner");
-xlabel("Gamma values");
+plot(gammas, itersA2, '-o');
+title("A1 and A2 convergence vs \gamma (tol=" + tol + ")");
+legend("A1 MinRes Iterations in Blendenpik", "A2 MinRes Iterations in Blendenpik");
+xlabel("\gamma");
 ylabel("Number of iterations to convergence");
 ylim([0, maxit * 1.1]);
 grid on;
 hold off;
 
-figure(2);
-plot(gammas, itersA2);
-hold on;
-plot(gammas, iters_no_pc_min_res_A2 * ones(length(gammas)));
-title("Coherent, ill-conditioned matrix A2 convergence (tol=1e-8)");
-legend("MinRes Iterations in Blendenpik", "MinRes Iterations no preconditioner");
-xlabel("Gamma values");
-ylabel("Number of iterations to convergence");
-ylim([0, maxit * 1.1]);
-grid on;
-hold off;
+% figure(2);
+% plot(gammas, itersA1);
+% hold on;
+% plot(gammas, iters_no_pc_min_res_A1 * ones(length(gammas)));
+% title("Incoherent, ill-conditioned matrix A1 convergence (tol=" + tol + ")");
+% legend("MinRes Iterations in Blendenpik", "MinRes Iterations no preconditioner");
+% xlabel("Gamma values");
+% ylabel("Number of iterations to convergence");
+% ylim([0, maxit * 1.1]);
+% grid on;
+% hold off;
 
-figure(3);
-plot(gammas, itersA3);
-hold on;
-plot(gammas, iters_no_pc_min_res_A3 * ones(length(gammas)));
-title("Random matrix A3 convergence (tol=1e-8)");
-legend("MinRes Iterations in Blendenpik", "MinRes Iterations no preconditioner");
-xlabel("Gamma values");
-ylabel("Number of iterations to convergence");
-ylim([0, maxit * 1.1]);
-grid on;
-hold off;
+% figure(3);
+% plot(gammas, itersA2);
+% hold on;
+% plot(gammas, iters_no_pc_min_res_A2 * ones(length(gammas)));
+% title("Coherent, ill-conditioned matrix A2 convergence (tol=" + tol + ")");
+% legend("MinRes Iterations in Blendenpik", "MinRes Iterations no preconditioner");
+% xlabel("Gamma values");
+% ylabel("Number of iterations to convergence");
+% ylim([0, maxit * 1.1]);
+% grid on;
+% hold off;
+
+% figure(4);
+% plot(gammas, itersA3);
+% hold on;
+% plot(gammas, iters_no_pc_min_res_A3 * ones(length(gammas)));
+% title("Random matrix A3 convergence (tol=" + tol + ")");
+% legend("MinRes Iterations in Blendenpik", "MinRes Iterations no preconditioner");
+% xlabel("Gamma values");
+% ylabel("Number of iterations to convergence");
+% ylim([0, maxit * 1.1]);
+% grid on;
+% hold off;

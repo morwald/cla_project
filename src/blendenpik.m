@@ -1,4 +1,4 @@
-function [x, iter] = blendenpik(A, b, gamma, transform_type)
+function [x, iter] = blendenpik(A, b, gamma, transform_type, tol, verbose)
     [m, n] = size(A);
     
     if m < n
@@ -33,10 +33,13 @@ function [x, iter] = blendenpik(A, b, gamma, transform_type)
         R = qr(S * M);
         R = triu(R(1:n, 1:n));
         
-        fprintf("cond(inv(R')*A'*A*inv(R)): %f\n", cond(inv(R') * (A' * A) * inv(R)));
+        if verbose == true
+            fprintf("cond(inv(R')*A'*A*inv(R)): %f\n", ..., 
+                cond(inv(R') * (A' * A) * inv(R)));
+        end
         cond_estimate = rcond(R);
         if 1 / cond_estimate > 5 * eps(1)
-            [x, flag, relres, iter] = minres(A'* A, A'* b, 10^-8, 100, R', R);
+            [x, flag, relres, iter] = minres(A'* A, A'* b, tol, 100, R', R);
 %             x = minres(A'* A, A'* b, 10^-14, 100, R' * R);
 %             x = minres(A'* A, A'* b, 10^-8, 100, []);
 %             x = lsqr(A, b, 10^-14, 100, R);
@@ -44,7 +47,7 @@ function [x, iter] = blendenpik(A, b, gamma, transform_type)
             return
         elseif n_iter > 3
             fprintf("Failure, solve using LAPACK \n");
-%             x = A \ b;
+            x = A \ b;
             return
         end
     end
