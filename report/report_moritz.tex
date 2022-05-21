@@ -14,8 +14,8 @@
 \maketitle
 
 \section{Introduction} \label{intro}
-Blendenpik \cite{blendenpik} is a randomized algorithm for a linear
-least-squares problem. The method constructs a random projection preconditioner
+Blendenpik \cite{blendenpik} is a randomized algorithm for linear
+least-squares problems. The method constructs a random projection preconditioner
 for an iterative solver (LSQR) and converges in fewer steps than an
 unpreconditioned LSQR. Moreover, Blendenpik can beat the standard LAPACK
 implementation for very large matrices. 
@@ -39,26 +39,26 @@ try to solve a smaller system and sample $\mathcal{S}$ rows of the matrix to
 get an approximated solution.
 
 \begin{equation} \label{eq_lq_red}
-x_{\mathcal{R}}=\arg \min _{x}\|A(\mathcal{R},:) x-b(\mathcal{R})\|_{2}
+x_{\mathcal{R}}=\arg \min _{x}\|A(\mathcal{S},:) x-b(\mathcal{S})\|_{2}
 \end{equation}
 
 This reduction technique is rarely implemented, in practice, because of lacking
 useful bounds for the forward error (See \cite{blendenpik} for a detailed
 explanation). An alternative way is to construct a preconditioner for the
-complete linear system \ref{eq_lq} using randomly selected rows. A reduced
-$QR$ factorization of the randomly sampled matrix $A(\mathcal{R},:)$ is a
-suitable preconditioner. This property is further discussed in section
-\ref{bound}.To implement Blendenpik using MINRES we would need to apply the
-iterative solver to the normal equation of the least-squares problem. The
-commented implementation of the complete algorithm can be is shown in appendix
+complete linear system \ref{eq_lq} using randomly selected rows. A reduced $QR$
+factorization of the randomly sampled matrix $A(\mathcal{S},:)$ is a suitable
+preconditioner. This property is further discussed in section \ref{bound}. To
+implement Blendenpik using MINRES we would need to apply the iterative solver
+to the normal equation of the least-squares problem. The commented
+implementation of the complete algorithm is added in appendix
 \ref{app_code}. Below an overview of the algorithm is shown.
 
 \begin{algorithm}[htb]
 \caption{Blendenpik overview (using MINRES)}
 \begin{enumerate}
-\item Choose $\mathcal{R}$ of size $r$, a subset of rows of $A$
-\item Calculate $A(\mathcal{R},:) = QR$ 
-\item Calculate $A(\mathcal{R}, :)A(\mathcal{R}, :)^T$
+\item Choose $\mathcal{S}$ of size $r$, a subset of rows of $A$
+\item Calculate $A(\mathcal{S},:) = QR$ 
+\item Calculate $A(\mathcal{S}, :)A(\mathcal{S}, :)^T$
 \item MINRES to $AA^T$ with right and left preconditioner $R^{-T}, R^{-1}$
 \end{enumerate}
 \end{algorithm}
@@ -72,11 +72,13 @@ coherence can be defined as
 \begin{equation} \label{equ_coh}
 \mu(A)=\max _{i}\|U(i,:)\|_{2}^{2},
 \end{equation}
-where $\frac{n}{m} \le \mu(A) \le 1$. 
+
+$U$ corresponds to an orthonormal matrix which spans the column space of $A$. We
+have as well that $\frac{n}{m} \le \mu(A) \le 1$.
 
 \bigskip
 
-To illustrate this property, we will look at the coherence of a randomly
+To illustrate this definition, we will look at the coherence of a randomly
 generated orthogonal matrices of size $\mathbb{R}^{100 \times 50}$.
 
 \begin{verbatim}
@@ -95,44 +97,47 @@ disp(mean(coherences))
 
 The Matlab script above computes the average coherence number of randomly
 generated orthogonal matrices. As comparison, the minimal coherence for matrix
-for $U$ is $\mu_{min}(U)= \frac{50}{1000} = 0.05$ from the definition in
+for $A$ is $\mu_{min}(A)= \frac{50}{1000} = 0.05$ from the definition in
 \ref{equ_coh}. The proof of the corresponding the bounds can be found in the
 \ref{app_coh}.
 
 The result shows that the coherence number is nearly optimal for randomly
-generated orthogonal matrices. On the other hand, we can expect this, as all
+generated matrices. On the other hand, we can expect this, as all
 elements of the matrix are created using a uniform distribution. 
 
 \bigskip
 
 Let's now think of an extreme case where the coherence number is maximal. We
-could set all elements of a column of $U$ row to zero except one entry. The
-result is a coherence of $\mu(U)=1$. More intuitively, this means that the row with
+could set all elements of a column of $A$ to zero except one entry. The
+result is a coherence of $\mu(A)=1$. More intuitively, this means that the row with
 the nonzero entry has to be sampled to capture the "essence or direction" of
 the column with one nonzero entry.
 
 In contrast to a uniform sampled matrix discussed above, general matrices $A$
-will have high coherence numbers. But a good preconditioner obtained from random sampling
-should still resemble $A$ and result in a low conditioner number for the iterative
-solver (see theorem \ref{thm_1}). In summary, we have to control the coherence of $A$ to
-obtain a solid preconditioner.
+will have high coherence numbers. But a good preconditioner obtained from
+random sampling should still resemble $A$ and result in a low conditioner
+number for the iterative solver (see theorem \ref{thm_1}). In summary, we have
+to control the coherence of $A$ to obtain a solid preconditioner.
 
 A technique to do so is preprocessing $A$ with randomized row mixing. The rows
 of A are blended (therefore the name Blendenpik) and the obtained coherence of
-$A_S$ drops. Here several strategies are possible. One of them is multiplying
-each row with $+1$ or $-1$. Then a discrete cosine transform (DCT) is applied
-to each column. In addition, the first row is multiplied by $\sqrt{2}$ to get
-an orthogonal transformation. The result is to reduce the coherence and a solid
-preconditioner can still be obtained.
+$A(\mathcal{S})$ drops. Here several strategies are possible. One of them is
+multiplying each row with $+1$ or $-1$. Then a discrete cosine transform (DCT)
+is applied to each column. In addition, the first row is multiplied by
+$\sqrt{2}$ to get an orthogonal transformation. The result is to reduce the
+coherence and a solid preconditioner can still be obtained.
 
+\bigskip
+(TODO: include equation for DCT)
+\bigskip
 
 \section{Bound for the condition number} \label{bound}
-The obtained preconditioner $R$ from
-the discussions in the previous chapter is theoretically just useful if we can
-bound the condition number for the preconditioned iterative solver. This
-ensures convergences in a few steps. In the case of the MINRES version of
-Blendenpik, we would replace $A$ with $AA^T$ and $R$ with $RR^T$. This adaption
-will lead to similar bounds as the ones shown below.
+The obtained preconditioner $R$ from the discussions in the previous chapter is
+just useful if we can bound the condition number for the
+preconditioned iterative solver. This ensures convergences in a few steps. In
+the case of the MINRES version of Blendenpik, we would replace $A$ with $AA^T$
+and $R$ with $RR^T$. This adaption will lead to similar bounds as the ones
+shown below.
 
 The following gives us a desired bound and establishes a link between the
 condition and coherence number.
@@ -144,16 +149,17 @@ sampling operator that samples $r \geq n$ rows from $A$ uniformly. Let $\tau=C
 Assume that $\delta^{-1} \tau<1$. With probability of at least $1-\delta$, the
 sampled matrix $\mathcal{S} A$ is full rank, and if $\mathcal{S} A=Q R$ is a
 reduced $Q R$ factorization of $\mathcal{S} A$, we have
-$$
-\kappa\left(A R^{-1}\right) \leq \frac{1+\delta^{-1} \tau}{1-\delta^{-1} \tau}
-$$
+
+\begin{equation} \label{equ_thm1}
+\kappa\left(A R^{-1}\right) \leq \sqrt{\frac{1+\delta^{-1} \tau}{1-\delta^{-1} \tau}}
+\end{equation}
 \end{theorem}
 
-To prove the above we will state a 2 theorems which correspond to theorem 7 in
-\cite{randalg} (less general and rephrased for our problem) and theorem 1
-\cite{CUR}.
+To prove the above we will state a 2 theorems which correspond to theorem 1
+\cite{CUR} and theorem 7 in \cite{randalg} (less general and rephrased for our
+problem).
 
-\begin{theorem}{CUR} \label{thm_2}
+\begin{theorem} \label{thm_2}
 Suppose that $l, m$, and $n$ are positive integers such that $m \geq l \geq n$.
 Suppose further that $A$ is a full-rank $m \times n$ matrix, and that the SVD
 of $A$ is
@@ -164,11 +170,13 @@ Suppose in addition that $T$ is an $l \times m$ matrix such that the $l \times
 n$ matrix TU has full rank.
 Then, there exists an $n \times n$ matrix $P$, and an $l \times n$ matrix $Q$
 whose columns are orthonormal, such that
-$$
+
+\begin{equation} \label{equ_thm2}
 T_{l \times m} A_{m \times n}=Q_{l \times n} P_{n \times n} .
-$$
+\end{equation}
+
 Furthermore, if $P$ is any $n \times n$ matrix, and $Q$ is any $l \times n$
-matrix whose columns are orthonormal, such that $P$ and $Q$ satisfy Eq. 27,
+matrix whose columns are orthonormal, such that $P$ and $Q$ satisfy \label{equ_thm2},
 then the condition numbers of $A P^{-1}$ and $T U$ are equal.
 \end{theorem}
 
@@ -184,65 +192,68 @@ $$
 
 To relate this theorem with everything introduced so far some clarifications
 are needed. First of all the mentioned EXPECTED $(c)$ algorithm corresponds to
-(TODO: include algorithm) to a row sampling algorithm. Every row of a matrix
-$A$ sampled with probability $c \dot p_j$. All probabilities add up to $1$.
-After that a rescaling of all entries is done using a diagonal matrix $D$.
+(TODO: include algorithm) to a row sampling algorithm. Every column of a matrix
+$A$ is sampled with probability $c p_i$ and it holds that $\sum_{i=1}^{n} p_i =
+1$. Hence in expectation $c$ columns are sampled. After that a rescaling of all
+entries is done using a diagonal matrix $D$.
 
-Secondly we have to clarify on the parameter $\beta$ $\in (0,1]$:
+Secondly we have to clarify how the parameter $\beta$ $\in (0,1]$ is
+established. We have that
 
 \begin{equation} \label{eq_beta}
 p_i \geq \beta \frac{\left\|A^{(i)}\right\|^2_2}{\|A\|_{F}^2}
-beta \leq p_i \frac{\|A\|_{F}^2}{\left\|A^{(i)}\right\|^2_2}
 \end{equation}
 
-We will now prove this theorem \ref{thm_1}. First of all we substitute the
-general matrix $A$ with an orthonormal matrix $U \in  \mathbb{R}^{m \times n}$
-where we know that $UU^T=I$. Secondly for $C=USD$. If we apply no scaling
-(i.e.$D=I$) as well then $C=US=U(\mathbb{R},:)$. Thus
+We will now prove the theorem \ref{thm_1}. First of all we substitute the
+general matrix $A$ with the transpose $U^T$ of an orthonormal matrix $U \in
+\mathbb{R}^{m \times n}$ where we know that $U^TU=I$. In this case we will
+sample $c$ (TODO: renaming, clarify) rows in expectation. If we set the sample probability distribution for
+all rows equal we get $?$ meaning the diagonal elements of D are Secondly for $C=U^TSD$. If we apply a scaling
+of $D=\sqrt{\frac{m}{c}}$ (TODO: explain) then
+$C=\sqrt{\frac{m}{c}}U^TS$. Thus
 
 \begin{equation} \label{eq_intermed1}
-\mathbf{E}\left[\left\|I_{n \times n}-U(\mathbb{R},:)U(\mathbb{R},:)^T\right\|_2\right] \leq O(1)
-\sqrt{\frac{\log c}{\beta c}}\|A\|_{F}\|A\|_{2}
+\mathbf{E}\left[\left\|I_{n \times n}-\frac{m}{c}U(\mathcal{S},:)^TU(\mathcal{S},:)\right\|_2\right] \leq O(1)
+\sqrt{\frac{\log c}{\beta c}}\|U^T\|_{F}\|U^T\|_{2}
 \end{equation}
 
-Now we use equation \ref{eq_beta} to replace a bound for $\beta$. The second norm of U
-can be bounded by ... For an orthonormal matrix the Frobenius norm is equal to
-$1$. Furthermore $p_i$ is always smaller of equal to $1$. Thus we get
-
-\begin{equation} \label{eq_beta}
-p_i \geq \beta \frac{\left\|A^{(i)}\right\|^2_2}{\|A\|_{F}^2}
+Now we have to work on the right bound. We know  that $|U^T\|_{2} \leq \|U^T\|_{F}\
+= \sqrt{m}$. We can further develop the inequality \ref{eq_beta}. As we have a bound on the coherence. 
+\begin{equation} \label{eq_beta2}
+\frac{1}{\beta} \geq \frac{\left\|U^{T{(i)}}\right\|^2_2}{\|U^T\|_{F}^2 p_i}
 \end{equation}
 
-\begin{equation} \label{eq_beta}
-\beta \leq \sqrt{\mu(U)} 
-\end{equation}
+\bigskip
+TODO: Not sure how to continue here
+\bigskip
 
-Putting this togther the finale equation becomes
+Putting this together the finale equation becomes
 
 \begin{equation} \label{eq_intermed2}
-\mathbf{E}\left[\left\|I_{n \times n}-U(\mathbb{R},:)U(\mathbb{R},:)^T\right\|_{2}\right] \leq O(1) \sqrt{\frac{\log c}{\beta c}}\|A\|_{F}\|A\|_{2}
+\mathbf{E}\left[\left\|I_{n \times n}-U(\mathcal{S},:)^TU(\mathcal{S},:)\right\|_{2}\right] \leq C
+\sqrt{m \mu(A) \log (c) / c}
 \end{equation}
 
-where the right part of the inequality corresponds to the $\tau$ of theorem \ref{thm_1} which we want to prove.
+Where the right part of the inequality corresponds to the $\tau$ of theorem \ref{thm_1} which we wanted to prove.
 
 From theorem \ref{thm_3} we know that the condition numbers  $\kappa(AR^{-1})$ and $\kappa(U)$ are equal.
 
 Now the we have to work on the left side of the inequality. We can a apply the Markov's inequality and get
 
 \begin{equation} \label{eq_intermed3}
-...
+\mathbb{P}(\left[\left\|I_{n \times n}-U(\mathcal{S},:)^TU(\mathcal{S},:)\right\|_{2}\right] \geq \tau^{-1}\delta) \leq \delta
 \end{equation}
 
-With probability $\geq 1- \delta$ we have
+With probability $\geq 1- \delta$ we thus have
 
 \begin{equation} \label{eq_intermed4}
-...
+\left\|I_{n \times n}-U(\mathcal{S},:)^TU(\mathcal{S},:)\right\|_{2} \le \tau^{-1}\delta \le 1 
 \end{equation}
 
+The bound $1$ comes from the assumption in theorem \ref{thm_1}.
 
-The $1$ comes from assumption in theorem \ref{thm_1}.
-
-Now we look at the eigenvalues of $U^TU$....Rayleigh quotient argument
+Now we look at the eigenvalues of $U(\mathcal{S},:)^TU(\mathcal{S},:)$....
+TODO: Rayleigh quotient argument
 
 
 Which finally gives us the desired result.
