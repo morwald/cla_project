@@ -17,6 +17,7 @@ x2 = A2 \ b2;
 
 %% part e) Convergence of (in)coherent matrices for different gammas
 gammas = 2:1:16;
+gammas = 9:1:13;
 
 % i) Incoherent, ill-conditioned matrix 
 fprintf("Incoherent, ill-conditioned matrix\n");
@@ -28,7 +29,8 @@ itersA1 = [];
 for gamma = gammas
     fprintf("gamma: %d\n", gamma);
     [x_tilde, iters, resvecA1] = blendenpik(A1, b1, gamma, "minres", ...
-                                            "DCT", tol, maxit, verbose);
+                                            "DCT", tol, maxit, verbose, ...
+                                            false);
     
     errorsA1 = [errorsA1, norm(x1 - x_tilde)];
     itersA1 = [itersA1, iters];
@@ -45,7 +47,8 @@ itersA2 = [];
 for gamma = gammas
     fprintf("gamma: %d\n", gamma);
     [x_tilde, iters, resvecA2] = blendenpik(A2, b2, gamma, "minres", ...
-                                            "DCT", tol, maxit, verbose);
+                                            "DCT", tol, maxit, verbose, ...
+                                            false);
     
     errorsA2 = [errorsA2, norm(x2 - x_tilde)];
     itersA2 = [itersA2, iters];
@@ -65,17 +68,17 @@ grid on;
 hold off;
 
 %% part f) Convergence of inner LSQR/ MINRES steps in Blendenpik
-gamma = 6;
+gamma = 6; maxit=10;
 
-[x, iters, resvecA1_mres] = blendenpik(A1, b1, gamma, "minres", "DCT", ... 
-                                       tol, maxit, verbose);
-[x, iters, resvecA1_lsqr] = blendenpik(A1, b1, gamma, "lsqr", "DCT", ... 
-                                       tol, maxit, verbose);
+[x1m, iters, resvecA1_mres] = blendenpik(A1, b1, gamma, "minres", "DCT", ... 
+                                       tol, maxit, verbose, true);
+[x1l, iters, resvecA1_lsqr] = blendenpik(A1, b1, gamma, "lsqr", "DCT", ... 
+                                       tol, maxit, verbose, true);
 
-[x, iters, resvecA2_mres] = blendenpik(A2, b2, gamma, "minres", "DCT", ... 
-                                       tol, maxit, verbose);
-[x, iters, resvecA2_lsqr] = blendenpik(A2, b2, gamma, "lsqr", "DCT", ... 
-                                       tol, maxit, verbose);
+[x2m, iters, resvecA2_mres] = blendenpik(A2, b2, gamma, "minres", "DCT", ... 
+                                       tol, maxit, verbose, true);
+[x2l, iters, resvecA2_lsqr] = blendenpik(A2, b2, gamma, "lsqr", "DCT", ... 
+                                       tol, maxit, verbose, true);
                    
 figure(2);
 semilogy(1:length(resvecA1_mres), resvecA1_mres);

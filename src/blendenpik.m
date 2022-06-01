@@ -1,4 +1,6 @@
-function [x, iter, resvec] = blendenpik(A, b, gamma, iter_method, transform_type, tol, maxit, verbose)
+function [x, iter, resvec] = blendenpik(A, b, gamma, iter_method, ... 
+                           transform_type, tol, maxit, verbose, ..., 
+                           return_normed_residuals)
     [m, n] = size(A);
     
     if m < n
@@ -40,12 +42,29 @@ function [x, iter, resvec] = blendenpik(A, b, gamma, iter_method, transform_type
         cond_estimate = rcond(R);
         if 1 / cond_estimate > 5 * eps(1)
             if iter_method == "minres"
-                [x, flag, relres, iter, resvec] = minres(A'*A, A'*b, ...
+                if ~return_normed_residuals
+                    [x, flag, relres, iter, resvec] = minres(A'*A, A'*b, ...
                                                          tol, maxit, R', R);
-%                 [x, flag, relres, iter] = minres(A'*A, A'*b, tol, ...
-%                                                  maxit, R, R');
+                else
+                    resvec = zeros(1, maxit);
+                    for n=1:maxit
+                        [x, ~, ~, iter, ~] = minres(A'*A, A'*b, 1, ... 
+                                                    n, R', R);
+                        resvec(n) = norm(A' * (b - A*x), 2);
+                    end
+                end
             elseif iter_method == "lsqr"
-                [x, flag, relres, iter, resvec] = lsqr(A, b, tol, maxit, R);
+                if ~return_normed_residuals
+                    [x, flag, relres, iter, resvec] = lsqr(A, b, tol, maxit, R);
+%                   [x, flag, relres, iter, resvec] = lsqr(A'*A, A'*b, ..., 
+%                                                          tol, maxit, R);
+                else
+                    resvec = zeros(1, maxit);
+                    for n=1:maxit
+                        [x, ~, ~, iter, ~] = lsqr(A, b, 1, n, R);
+                        resvec(n) = norm(A' * (b - A * x), 2);
+                    end
+                end
             else
                 fprintf("Enter a valid iterative method (minres or lsqr)");
                 return;

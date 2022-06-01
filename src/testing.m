@@ -33,7 +33,8 @@ itersA1 = [];
 for gamma = gammas
     fprintf("gamma: %d\n", gamma);
     [x_tilde, iters, relresA1] = blendenpik(A1, b1, gamma, "minres", ...
-                                            "DCT", tol, maxit, verbose);
+                                            "DCT", tol, maxit, verbose, ...
+                                            false);
     
     errorsA1 = [errorsA1, norm(x1 - x_tilde)];
     itersA1 = [itersA1, iters];
@@ -57,7 +58,7 @@ itersA2 = [];
 for gamma = gammas
     fprintf("gamma: %d\n", gamma);
     [x_tilde, iters] = blendenpik(A2, b2, gamma, "minres", "DCT", tol, ...
-                                  maxit, verbose);
+                                  maxit, verbose, false);
     
     errorsA2 = [errorsA2, norm(x2 - x_tilde)];
     itersA2 = [itersA2, iters];
@@ -107,7 +108,8 @@ itersA3 = [];
 for gamma = gammas
     fprintf("gamma: %d\n", gamma);
     [x_tilde, iters, relresA3] = blendenpik(A3, b3, gamma, "minres", ...
-                                            "DCT", tol, maxit, verbose);
+                                            "DCT", tol, maxit, verbose, ...
+                                            false);
     
     errorsA3 = [errorsA3, norm(x3 - x_tilde)];
     itersA3 = [itersA3, iters];
