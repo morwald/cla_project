@@ -1,6 +1,6 @@
 %% Defining Matrices
 clear all; close all; clc;
-tol = 1e-10; maxit = 200; verbose=false;
+tol = 1e-12; maxit = 200; verbose=false;
 
 rng(11);
 U = orth(rand(20000, 400));
@@ -17,7 +17,6 @@ x2 = A2 \ b2;
 
 %% part e) Convergence of (in)coherent matrices for different gammas
 gammas = 2:1:16;
-gammas = 9:1:13;
 
 % i) Incoherent, ill-conditioned matrix 
 fprintf("Incoherent, ill-conditioned matrix\n");
@@ -68,7 +67,7 @@ grid on;
 hold off;
 
 %% part f) Convergence of inner LSQR/ MINRES steps in Blendenpik
-gamma = 6; maxit=10;
+gamma = 6; maxit=100;
 
 [x1m, iters, resvecA1_mres] = blendenpik(A1, b1, gamma, "minres", "DCT", ... 
                                        tol, maxit, verbose, true);

@@ -48,7 +48,7 @@ function [x, iter, resvec] = blendenpik(A, b, gamma, iter_method, ...
                 else
                     resvec = zeros(1, maxit);
                     for n=1:maxit
-                        [x, ~, ~, iter, ~] = minres(A'*A, A'*b, 1, ... 
+                        [x, ~, ~, iter, ~] = minres(A'*A, A'*b, tol, ... 
                                                     n, R', R);
                         resvec(n) = norm(A' * (b - A*x), 2);
                     end
@@ -61,7 +61,7 @@ function [x, iter, resvec] = blendenpik(A, b, gamma, iter_method, ...
                 else
                     resvec = zeros(1, maxit);
                     for n=1:maxit
-                        [x, ~, ~, iter, ~] = lsqr(A, b, 1, n, R);
+                        [x, ~, ~, iter, ~] = lsqr(A, b, tol, n, R);
                         resvec(n) = norm(A' * (b - A * x), 2);
                     end
                 end
