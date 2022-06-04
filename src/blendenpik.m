@@ -27,11 +27,7 @@ function [x, iter, resvec] = blendenpik(A, b, gamma, iter_method, ...
         
         S = rand([m_tilde, 1]);
         S_inds = S <= gamma * n / m_tilde;
-        S(S_inds) =  1;
-        S(~S_inds) = 0;
-        S = diag(S);
-        
-%         SM = S * M;
+
         SM = M(find(S_inds == 1), :);
         [Q, R] = qr(SM, 0);
         
