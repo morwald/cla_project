@@ -1,5 +1,6 @@
-function [x, iter, resvec] = blendenpik(A, b, gamma, iter_method, ... 
-                           transform_type, tol, maxit, verbose)
+function [x, iter, resvec, time] = blendenpik(A, b, gamma, iter_method, ... 
+                                   transform_type, tol, maxit, verbose)
+    tic;
     [m, n] = size(A);
     
     if m < n
@@ -32,9 +33,9 @@ function [x, iter, resvec] = blendenpik(A, b, gamma, iter_method, ...
         [Q, R] = qr(SM, 0);
         
         if verbose == true
-            fprintf("cond(inv(R')*A'*A*inv(R)): %f\n", ..., 
-                cond(inv(R') * (A' * A) * inv(R)));
-            % cond(R' \ ((A' * A) / R))
+            fprintf("cond(R^(-T)*A'*A*R^-1): %f\n", ... 
+                cond(R' \ ((A' * A) / R)))
+            fprintf("cond(AR^-1) = %d\n", cond(A / R));
         end
         cond_estimate = rcond(R);
         if 1 / cond_estimate > 5 * eps(1)
@@ -52,6 +53,7 @@ function [x, iter, resvec] = blendenpik(A, b, gamma, iter_method, ...
                 fprintf("Enter a valid iterative method (minres or lsqr)");
                 return;
             end
+            time = toc;
             return;
         elseif n_iter > 3
             fprintf("Failure, solve using LAPACK \n");

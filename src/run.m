@@ -1,6 +1,6 @@
 %% Defining Matrices
 clear all; close all; clc;
-tol = 1e-10; maxit = 200; verbose=false;
+tol = 1e-12; maxit = 200; verbose=false; 
 
 rng(11);
 U = orth(rand(20000, 400));
@@ -16,7 +16,7 @@ b2 = rand(size(A2, 1), 1);
 x2 = A2 \ b2;
 
 %% part e) Convergence of (in)coherent matrices for different gammas
-gammas = 2:1:16;
+gammas = 2:1:16; n_trials = 5;
 
 % i) Incoherent, ill-conditioned matrix 
 fprintf("Incoherent, ill-conditioned matrix\n");
@@ -25,13 +25,20 @@ fprintf("cond(A1'*A1): %d\n", cond(A1'*A1));
 
 errorsA1 = [];
 itersA1 = [];
-for gamma = gammas
-    fprintf("gamma: %d\n", gamma);
-    [x_tilde, iters, resvecA1] = blendenpik(A1, b1, gamma, "minres", ...
-                                            "DCT", tol, maxit, verbose);
-    
-    errorsA1 = [errorsA1, norm(x1 - x_tilde)];
-    itersA1 = [itersA1, iters];
+timesA1 = zeros(n_trials, length(gammas));
+for n = 1:n_trials
+    fprintf("Trial: %d\n", n);
+    for i = 1:length(gammas)
+        gamma = gammas(i);
+        fprintf("gamma: %d\n", gamma);
+        [x_tilde, iters, resvecA1, time] = blendenpik(A1, b1, gamma, "minres", ...
+                                                "DCT", tol, maxit, verbose);
+        if n == 1
+            errorsA1 = [errorsA1, norm(x1 - x_tilde)];
+            itersA1 = [itersA1, iters];
+        end 
+        timesA1(n, i) = time;
+    end
 end
 fprintf("\n\n");
 
@@ -42,13 +49,21 @@ fprintf("cond(A2'*A2): %d \n", cond(A2'*A2));
 
 errorsA2 = [];
 itersA2 = [];
-for gamma = gammas
-    fprintf("gamma: %d\n", gamma);
-    [x_tilde, iters, resvecA2] = blendenpik(A2, b2, gamma, "minres", ...
-                                            "DCT", tol, maxit, verbose);
-    
-    errorsA2 = [errorsA2, norm(x2 - x_tilde)];
-    itersA2 = [itersA2, iters];
+timesA2 = zeros(n_trials, length(gammas));
+for n = 1:n_trials
+    fprintf("Trial: %d\n", n);
+    for i = 1:length(gammas)
+        gamma = gammas(i);
+        fprintf("gamma: %d\n", gamma);
+        [x_tilde, iters, resvecA2, time] = blendenpik(A2, b2, gamma, "minres", ...
+                                                "DCT", tol, maxit, verbose);
+        
+        if n == 1
+            errorsA2 = [errorsA2, norm(x2 - x_tilde)];
+            itersA2 = [itersA2, iters];
+        end 
+        timesA2(n, i) = time;
+    end
 end
 fprintf("\n\n");
 
@@ -64,35 +79,57 @@ ylim([0, maxit * 1.1]);
 grid on;
 hold off;
 
+figure(2);
+plot(gammas, timesA1(1, 1:end), '-*');
+hold on;
+plot(gammas, timesA2(1, 1:end), '-o');
+title("A1 and A2 convergence vs \gamma (tol=" + tol + ")");
+legend("A1 MinRes Times in Blendenpik", "A2 MinRes Times in Blendenpik");
+xlabel("\gamma");
+ylabel("Time [s]");
+grid on;
+hold off;
+
+figure(3);
+plot(gammas, mean(timesA1, 1), '-*');
+hold on;
+plot(gammas, mean(timesA2, 1), '-o');
+title("A1 and A2 convergence vs \gamma averaged over " + n_trials + " runs (tol=" + tol + ")");
+legend("A1 MinRes Mean Times in Blendenpik", "A2 MinRes Mean Times in Blendenpik");
+xlabel("\gamma");
+ylabel("Time [s]");
+grid on;
+hold off;
+
 %% part f) Convergence of inner LSQR/ MINRES steps in Blendenpik
-gamma = 5; maxit=200;
+gamma = 5; maxit = 200;
 
-[x1m, iters, resvecA1_mres] = blendenpik(A1, b1, gamma, "minres", "DCT", ... 
+[x1m, ~, resvecA1_mres, ~] = blendenpik(A1, b1, gamma, "minres", "DCT", ... 
                                         tol, maxit, verbose);
-[x1l, iters, resvecA1_lsqr] = blendenpik(A1, b1, gamma, "lsqr", "DCT", ... 
+[x1l, ~, resvecA1_lsqr, ~] = blendenpik(A1, b1, gamma, "lsqr", "DCT", ... 
                                         tol, maxit, verbose);
 
-[x2m, iters, resvecA2_mres] = blendenpik(A2, b2, gamma, "minres", "DCT", ... 
+[x2m, ~, resvecA2_mres, ~] = blendenpik(A2, b2, gamma, "minres", "DCT", ... 
                                         tol, maxit, verbose);
-[x2l, iters, resvecA2_lsqr] = blendenpik(A2, b2, gamma, "lsqr", "DCT", ... 
+[x2l, ~, resvecA2_lsqr, ~] = blendenpik(A2, b2, gamma, "lsqr", "DCT", ... 
                                         tol, maxit, verbose);
                    
-figure(2);
+figure(4);
 semilogy(1:length(resvecA1_mres), resvecA1_mres);
 hold on;
 semilogy(1:length(resvecA1_lsqr), resvecA1_lsqr);
-title("A1 Iterative Solver Residuals (\gamma = " + gamma + ")");
+title("A1 Iterative Solver Residuals (\gamma = " + gamma + ", tol = " + tol + ")");
 legend("A1 Blendenpik with MinRes", "A1 Blendenpik with LSQR");
 xlabel("Iteration");
 ylabel("$||\tilde{A}^{T}r_{i}||_{2}$", 'Interpreter', 'Latex');
 grid on;
 hold off;
 
-figure(3);
+figure(5);
 semilogy(1:length(resvecA2_mres), resvecA2_mres);
 hold on;
 semilogy(1:length(resvecA2_lsqr), resvecA2_lsqr);
-title("A2 Iterative Solver Residuals (\gamma = " + gamma + ")");
+title("A2 Iterative Solver Residuals (\gamma = " + gamma + ", tol = " + tol + ")");
 legend("A2 Blendenpik with MinRes", "A2 Blendenpik with LSQR");
 xlabel("Iteration");
 ylabel("$||\tilde{A}^{T}r_{i}||_{2}$", 'Interpreter', 'Latex');
