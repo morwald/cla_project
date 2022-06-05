@@ -1,6 +1,5 @@
 function [x, iter, resvec, time] = blendenpik(A, b, gamma, iter_method, ... 
                                    transform_type, tol, maxit, verbose)
-    
     time.dct = 0;
     time.qr = 0;
     time.iter_method = 0;
@@ -37,7 +36,7 @@ function [x, iter, resvec, time] = blendenpik(A, b, gamma, iter_method, ...
 
         SM = M(find(S_inds == 1), :);
         [Q, R] = qr(SM, 0);
-        time.iter_method = time.iter_method + toc;
+        time.qr = time.qr + toc;
         
         if verbose == true
             fprintf("cond(R^(-T)*A'*A*R^-1): %f\n", ... 

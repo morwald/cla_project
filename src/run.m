@@ -28,7 +28,6 @@ itersA1 = [];
 dct_timesA1 = zeros(n_trials, length(gammas));
 qr_timesA1 = zeros(n_trials, length(gammas));
 iter_timesA1 = zeros(n_trials, length(gammas));
-
 for n = 1:n_trials
     fprintf("Trial: %d\n", n);
     for i = 1:length(gammas)
