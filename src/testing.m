@@ -14,7 +14,7 @@ coherence = max(sum(Q .^ 2, 2));
 
 %% Comparing unpreconditioned MINRES with MINRES in Blendenpik
 clear all; close all; clc;
-gammas = 2:1:16; tol = 1e-10; maxit = 200; verbose=false;
+gammas = 2:1:16; tol = 1e-10; maxit = 300; verbose=false;
 
 rng(11);
 U = orth(rand(20000, 400));
@@ -32,7 +32,7 @@ errorsA1 = [];
 itersA1 = [];
 for gamma = gammas
     fprintf("gamma: %d\n", gamma);
-    [x_tilde, iters, relresA1] = blendenpik(A1, b1, gamma, "minres", ...
+    [x_tilde, iters, relresA1, time] = blendenpik(A1, b1, gamma, "minres", ...
                                             "DCT", tol, maxit, verbose);
     
     errorsA1 = [errorsA1, norm(x1 - x_tilde)];
@@ -56,7 +56,7 @@ errorsA2 = [];
 itersA2 = [];
 for gamma = gammas
     fprintf("gamma: %d\n", gamma);
-    [x_tilde, iters, relresA2] = blendenpik(A2, b2, gamma, "minres", ...
+    [x_tilde, iters, relresA2, time] = blendenpik(A2, b2, gamma, "minres", ...
                                             "DCT", tol, maxit, verbose);
     
     errorsA2 = [errorsA2, norm(x2 - x_tilde)];
@@ -106,13 +106,13 @@ errorsA3 = [];
 itersA3 = [];
 for gamma = gammas
     fprintf("gamma: %d\n", gamma);
-    [x_tilde, iters, relresA3] = blendenpik(A3, b3, gamma, "minres", ...
+    [x_tilde, iters, relresA3, time] = blendenpik(A3, b3, gamma, "minres", ...
                                             "DCT", tol, maxit, verbose);
     
     errorsA3 = [errorsA3, norm(x3 - x_tilde)];
     itersA3 = [itersA3, iters];
 end
-[x, flag, relres, iters_npc_mres_A3] = minres(A3' * A3, A3' * b3,  tol, ...
+[x, flag, relres, iters_npc_mres_A3, time] = minres(A3' * A3, A3' * b3,  tol, ...
                                               maxit, []);
 
 figure(3);

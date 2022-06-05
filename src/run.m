@@ -25,7 +25,10 @@ fprintf("cond(A1'*A1): %d\n", cond(A1'*A1));
 
 errorsA1 = [];
 itersA1 = [];
-timesA1 = zeros(n_trials, length(gammas));
+dct_timesA1 = zeros(n_trials, length(gammas));
+qr_timesA1 = zeros(n_trials, length(gammas));
+iter_timesA1 = zeros(n_trials, length(gammas));
+
 for n = 1:n_trials
     fprintf("Trial: %d\n", n);
     for i = 1:length(gammas)
@@ -37,7 +40,9 @@ for n = 1:n_trials
             errorsA1 = [errorsA1, norm(x1 - x_tilde)];
             itersA1 = [itersA1, iters];
         end 
-        timesA1(n, i) = time;
+        dct_timesA1(n, i) = time.dct;
+        qr_timesA1(n, i) = time.qr;
+        iter_timesA1(n, i) = time.iter_method;
     end
 end
 fprintf("\n\n");
@@ -49,7 +54,9 @@ fprintf("cond(A2'*A2): %d \n", cond(A2'*A2));
 
 errorsA2 = [];
 itersA2 = [];
-timesA2 = zeros(n_trials, length(gammas));
+dct_timesA2 = zeros(n_trials, length(gammas));
+qr_timesA2 = zeros(n_trials, length(gammas));
+iter_timesA2 = zeros(n_trials, length(gammas));
 for n = 1:n_trials
     fprintf("Trial: %d\n", n);
     for i = 1:length(gammas)
@@ -62,7 +69,9 @@ for n = 1:n_trials
             errorsA2 = [errorsA2, norm(x2 - x_tilde)];
             itersA2 = [itersA2, iters];
         end 
-        timesA2(n, i) = time;
+        dct_timesA2(n, i) = time.dct;
+        qr_timesA2(n, i) = time.qr;
+        iter_timesA2(n, i) = time.iter_method;
     end
 end
 fprintf("\n\n");
@@ -80,9 +89,9 @@ grid on;
 hold off;
 
 figure(2);
-plot(gammas, timesA1(1, 1:end), '-*');
+plot(gammas, dct_timesA1(1, 1:end) + qr_timesA1(1, 1:end) + iter_timesA1(1, 1:end), '-*');
 hold on;
-plot(gammas, timesA2(1, 1:end), '-o');
+plot(gammas, dct_timesA2(1, 1:end) + qr_timesA2(1, 1:end) + iter_timesA2(1, 1:end), '-o');
 title("A1 and A2 convergence vs \gamma (tol=" + tol + ")");
 legend("A1 MinRes Times in Blendenpik", "A2 MinRes Times in Blendenpik");
 xlabel("\gamma");
@@ -91,18 +100,25 @@ grid on;
 hold off;
 
 figure(3);
-plot(gammas, mean(timesA1, 1), '-*');
+plot(gammas, mean(dct_timesA1, 1), '--');
 hold on;
-plot(gammas, mean(timesA2, 1), '-o');
+plot(gammas, mean(qr_timesA1, 1), '--');
+plot(gammas, mean(iter_timesA1, 1), '--');
+plot(gammas, mean(dct_timesA1 + qr_timesA1 + iter_timesA1, 1), '-*', 'LineWidth', 2);
+plot(gammas, mean(dct_timesA2, 1), '-.');
+plot(gammas, mean(qr_timesA2, 1), '-.');
+plot(gammas, mean(iter_timesA2, 1), '-.');
+plot(gammas, mean(dct_timesA2 + qr_timesA2 + iter_timesA2, 1), '-o', 'LineWidth', 2);
 title("A1 and A2 convergence vs \gamma averaged over " + n_trials + " runs (tol=" + tol + ")");
-legend("A1 MinRes Mean Times in Blendenpik", "A2 MinRes Mean Times in Blendenpik");
+legend("A1 DCT Time", "A1 QR time", "A1 Inner MINRES time", "A1 Total Time", ...
+    "A2 DCT Time", "A2 QR time", "A2 Inner MINRES time", "A2 Total Time");
 xlabel("\gamma");
 ylabel("Time [s]");
 grid on;
 hold off;
 
 %% part f) Convergence of inner LSQR/ MINRES steps in Blendenpik
-gamma = 5; maxit = 200;
+gamma = 6; maxit = 200;
 
 [x1m, ~, resvecA1_mres, ~] = blendenpik(A1, b1, gamma, "minres", "DCT", ... 
                                         tol, maxit, verbose);

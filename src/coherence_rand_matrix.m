@@ -1,4 +1,5 @@
-rand('state', 42);
+clear all; close all; clc;
+rng(11);
 n_matrices = 1000; n_rows = 1000; n_cols = 50;
 
 % b) average coherences
